@@ -20,6 +20,8 @@ func BuyProduct(c *gin.Context) {
 	}
 	defer db.Close()
 
+	id := c.Param("id")
+
 	var order model.Product
 	err = c.ShouldBindJSON(&order)
 	if err != nil {
@@ -27,7 +29,7 @@ func BuyProduct(c *gin.Context) {
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO order SELECT * FROM product ")
+	_, err = db.Exec("INSERT INTO order (name,quantity,price) VALUES ($1, $2,$3) SELECT * FROM product WHERE id=%s ", order.Name, order.Quantity, order.Price, id)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
