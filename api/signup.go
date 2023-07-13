@@ -25,8 +25,12 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-
-	// TODO: Implement user registration logic, like validating inputs, hashing passwords, etc.
+	_, err = db.Exec("INSERT INTO user (name,email,password) VALUES ($1, $2,$3)", user.Name, user.Email, user.Password)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to signup"})
+		return
+	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }

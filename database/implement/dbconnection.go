@@ -10,12 +10,12 @@ import (
 const (
 	host     = "localhost"
 	port     = 5432
-	user     = "your_username"
-	password = "your_password"
-	dbname   = "your_database_name"
+	user     = "postgres"
+	password = "12345"
+	dbname   = "shoppingDB"
 )
 
-// Get the PostgreSQL database connection
+// PostgreSQL database connection
 func GetDB() (*sql.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", connStr)
@@ -27,6 +27,8 @@ func GetDB() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return db, nil
 
 	// Create the orders table if it doesn't exist
 	_, err = db.Exec(`

@@ -27,7 +27,7 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	_, err = db.Exec("UPDATE products SET name=$1, price=$2 WHERE id=$3", product.Name, product.Price, id)
+	_, err = db.Exec("UPDATE products SET name=$1,quantity=$2, price=$3 WHERE id=$4", product.Name, product.Quantity, product.Price, id)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})

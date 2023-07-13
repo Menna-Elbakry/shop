@@ -25,7 +25,7 @@ func CreateProduct(c *gin.Context) {
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO products (name, price) VALUES ($1, $2)", product.Name, product.Price)
+	_, err = db.Exec("INSERT INTO product (name,quantity, price) VALUES ($1, $2,$3)", product.Name, product.Quantity, product.Price)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})

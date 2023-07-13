@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	api "shopping/api"
+	a "shopping/api"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -28,7 +27,7 @@ func authMiddleware() gin.HandlerFunc {
 			}
 
 			// Change this secret key with your own secret key
-			secretKey := []byte("YOUR_SECRET_KEY")
+			secretKey := []byte("Secret")
 			return secretKey, nil
 		})
 
@@ -50,26 +49,26 @@ func authMiddleware() gin.HandlerFunc {
 	}
 }
 func main() {
+
 	r := gin.Default()
 
-	apis := r.Group("/api")
+	api := r.Group("/api")
 
 	// Admin APIs
-	admin := apis.Group("/admin")
-	admin.POST("/product", authMiddleware(), api.CreateProduct)
-	admin.PUT("/product/:id", authMiddleware(), api.UpdateProduct)
-	admin.DELETE("/product/:id", authMiddleware(), api.DeleteProduct)
+	admin := api.Group("/admin")
+	admin.POST("/product", authMiddleware(), a.CreateProduct)
+	admin.PUT("/product/:id", authMiddleware(), a.UpdateProduct)
+	admin.DELETE("/product/:id", authMiddleware(), a.DeleteProduct)
 
 	// Public APIs
-	public := apis.Group("/public")
-	public.GET("/products", api.GetAllProducts)
-	public.POST("/signup", api.SignUp)
-	public.POST("/login", api.Login)
+	public := api.Group("/public")
+	public.GET("/products", a.GetAllProducts)
+	public.POST("/signup", a.SignUp)
+	public.POST("/login", a.Login)
 
 	// User APIs
-	user := apis.Group("/user")
-	user.PUT("/credit-card", authMiddleware(), api.AddCreditCard)
-	user.POST("/buy-product", authMiddleware(), api.BuyProduct)
+	user := api.Group("/user")
+	user.POST("/buy-product", authMiddleware(), a.BuyProduct)
 
 	err := r.Run(":8080")
 	if err != nil {
