@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// DeleteProduct to delete product record from database
+// DeleteProduct deletes the product record from the database
 func DeleteProduct(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
@@ -19,11 +19,12 @@ func DeleteProduct(c *gin.Context) {
 	defer db.Close()
 
 	id := c.Param("id")
-	//Delete Query
-	_, err = db.Exec("DELETE FROM products WHERE id=$1", id)
+
+	// Delete Query
+	_, err = db.Exec(`DELETE FROM public."product" WHERE product_id = $1`, id)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

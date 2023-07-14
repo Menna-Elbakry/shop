@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
+
 	database "shopping/database/implement"
 	model "shopping/model"
 
@@ -19,23 +20,12 @@ func Login(c *gin.Context) {
 	defer db.Close()
 
 	var user model.User
-	err = c.ShouldBindJSON(&user)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
-		return
-	}
-	authenticated := database.AuthenticateUser(db, user.UserName, user.Password)
-	if !authenticated {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
-		return
-	}
-	// Generate JWT token
-	token, err := database.GenerateJWT(user.UserName)
+	err = db.QueryRow(`SELECT *FROM public."user" WHERE email =$1 And password =$2;`, user.Email, user.Password).Scan(&user.UserID, &user.UserName, &user.Email)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 }

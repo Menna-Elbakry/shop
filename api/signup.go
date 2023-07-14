@@ -22,13 +22,15 @@ func SignUp(c *gin.Context) {
 	var user model.User
 	err = c.ShouldBindJSON(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	_, err = db.Exec("INSERT INTO user (id,name,email,password) VALUES ($1, $2,$3,$4)", user.UserID, user.UserName, user.Email, user.Password)
+
+	_, err = db.Exec(`INSERT INTO public."user" (user_id, user_name, email, "password")
+	VALUES (?,?,?,?);`, user.UserID, user.UserName, user.Email, user.Password)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to signup"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

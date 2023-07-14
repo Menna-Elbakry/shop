@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	database "shopping/database/implement"
@@ -20,24 +21,38 @@ func GetAllProducts(c *gin.Context) {
 	defer db.Close()
 
 	//Select Query
-	rows, err := db.Query("SELECT id, name, price FROM products")
+
+	rows, err := db.Query(`SELECT * FROM public."product";`)
 	if err != nil {
+
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get products"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	defer rows.Close()
-
 	var products []model.Product
+
+	// Iterate over the rows
 	for rows.Next() {
 		var product model.Product
+
+		// Scan the row values into the struct fields
 		err := rows.Scan(&product.ProductID, &product.ProductName, &product.Price)
 		if err != nil {
-			log.Println(err)
-			continue
+
 		}
+
+		// Append the product to the slice
 		products = append(products, product)
 	}
 
+	if err = rows.Err(); err != nil {
+
+	}
+
+	// Process the retrieved data
+	for _, product := range products {
+		fmt.Println(product.ProductID, product.ProductName, product.Price)
+	}
+	// log.Println(rows)
 	c.JSON(http.StatusOK, products)
 }
