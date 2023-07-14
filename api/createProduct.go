@@ -22,14 +22,15 @@ func CreateProduct(c *gin.Context) {
 	var product model.Product
 	err = c.ShouldBindJSON(&product)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO products (id,name, quantity, price) VALUES ($1, $2, $3,$4)", product.ProductID, product.ProductName, product.Quantity, product.Price)
+	_, err = db.Exec(`INSERT INTO public."product" (product_id,product_name, quantity, price) 
+	VALUES ($1, $2, $3,$4);`, product.ProductID, product.ProductName, product.Quantity, product.Price)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
