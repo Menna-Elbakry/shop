@@ -23,20 +23,10 @@ func BuyProduct(c *gin.Context) {
 	id := c.Param("id")
 
 	var order model.Order
-	// err = c.ShouldBindJSON(&order)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
 
 	updateFields := make(map[string]interface{})
 
 	var product model.Product
-	// err = c.ShouldBindJSON(&product)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
 
 	if product.Quantity > 0 {
 		updateFields["quantity"] = product.Quantity
