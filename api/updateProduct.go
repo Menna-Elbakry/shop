@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UpdateProduct to modify product in database
 func UpdateProduct(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
@@ -26,8 +27,8 @@ func UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-
-	_, err = db.Exec("UPDATE products SET name=$1,quantity=$2, price=$3 WHERE id=$4", product.Name, product.Quantity, product.Price, id)
+	//Update Query
+	_, err = db.Exec("UPDATE products SET name=$1,quantity=$2, price=$3 WHERE id=$4", product.ProductName, product.Quantity, product.Price, id)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})

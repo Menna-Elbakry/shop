@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// API to sign up as a user
+// Signup to add new user to database
 func SignUp(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
@@ -25,7 +25,7 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-	_, err = db.Exec("INSERT INTO user (name,email,password) VALUES ($1, $2,$3)", user.Name, user.Email, user.Password)
+	_, err = db.Exec("INSERT INTO user (id,name,email,password) VALUES ($1, $2,$3,$4)", user.UserID, user.UserName, user.Email, user.Password)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to signup"})

@@ -1,43 +1,62 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
-	"log"
 	database "shopping/database/implement"
-	model "shopping/model"
+	"shopping/model"
 
 	"github.com/gin-gonic/gin"
 )
 
-// buy a product for a user
+// BuyProduct to add the product record to order database
 func BuyProduct(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to the database"})
 		return
 	}
 	defer db.Close()
 
 	id := c.Param("id")
 
-	var order model.Product
+	var order model.Order
 	err = c.ShouldBindJSON(&order)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO order (name,quantity,price) VALUES ($1, $2,$3) SELECT * FROM product WHERE id=%s ", order.Name, order.Quantity, order.Price, id)
+	//select from product database
+	pull := "SELECT * FROM product WHERE product_id = $1"
+	rows, err := db.Query(pull, id)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query product"})
 		return
 	}
+	defer rows.Close()
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Product created successfully"})
-	// TODO: Implement logic to handle buying a product for a user, including payment processing using Stripe
+	for rows.Next() {
+		var productID, quantity int
+		var price float64
+		if err := rows.Scan(&productID, &quantity, &price); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan product rows"})
+			return
+		}
+
+		//add the selected product to order database
+		insert := "INSERT INTO order (product_id, quantity, price) VALUES ($1, $2, $3)"
+		_, err := db.Exec(insert, productID, quantity, price)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert product to order"})
+			return
+		}
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Product purchased successfully"})
 }

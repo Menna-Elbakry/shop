@@ -2,8 +2,8 @@ package model
 
 // User model
 type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"firstName"`
+	UserID   int    `json:"user_id"`
+	UserName string `json:"user_name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	//CreditCard []string `json:"creditCard"`

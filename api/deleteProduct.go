@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// DeleteProduct to delete product record from database
 func DeleteProduct(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
@@ -18,7 +19,7 @@ func DeleteProduct(c *gin.Context) {
 	defer db.Close()
 
 	id := c.Param("id")
-
+	//Delete Query
 	_, err = db.Exec("DELETE FROM products WHERE id=$1", id)
 	if err != nil {
 		log.Println(err)

@@ -3,43 +3,42 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+
+	_ "github.com/lib/pq"
 )
 
-// PostgreSQL database connection string
 const (
 	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
 	password = "12345"
-	dbname   = "shoppingDB"
+	dbname   = "postgres"
 )
 
-// PostgreSQL database connection
+// GetDB establishes database connection
 func GetDB() (*sql.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to the database: %w", err)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to ping the database: %w", err)
 	}
-
-	return db, nil
 
 	// Create the orders table if it doesn't exist
 	_, err = db.Exec(`
-    CREATE TABLE IF NOT EXISTS orders (
-	order_id SERIAL PRIMARY KEY,
-	product_id INTEGER REFERENCES products(product_id),
-	quantity INTEGER
-)
-`)
+		CREATE TABLE IF NOT EXISTS orders (
+			order_id SERIAL PRIMARY KEY,
+			product_id INTEGER REFERENCES products(product_id),
+			quantity INTEGER,
+			price FLOAT
+		)
+	`)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to create orders table: %w", err)
 	}
 
 	// Create the products table if it doesn't exist
@@ -47,23 +46,26 @@ func GetDB() (*sql.DB, error) {
 		CREATE TABLE IF NOT EXISTS products (
 			product_id SERIAL PRIMARY KEY,
 			product_name TEXT,
+			quantity INTEGER,
 			price FLOAT
 		)
 	`)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to create products table: %w", err)
 	}
 
 	// Create the users table if it doesn't exist
 	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS products (
+		CREATE TABLE IF NOT EXISTS users (
 			user_id SERIAL PRIMARY KEY,
 			user_name TEXT,
-			credit_cards TEXT
+			email TEXT,
+			password TEXT
 		)
 	`)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to create users table: %w", err)
 	}
+
 	return db, nil
 }

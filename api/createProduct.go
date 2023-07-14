@@ -9,11 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateProduct to add a product to the database
 func CreateProduct(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to the database"})
 		return
 	}
 	defer db.Close()
@@ -25,7 +26,7 @@ func CreateProduct(c *gin.Context) {
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO product (name,quantity, price) VALUES ($1, $2,$3)", product.Name, product.Quantity, product.Price)
+	_, err = db.Exec("INSERT INTO products (id,name, quantity, price) VALUES ($1, $2, $3,$4)", product.ProductID, product.ProductName, product.Quantity, product.Price)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})

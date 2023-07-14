@@ -6,8 +6,8 @@ import (
 
 type User struct {
 	tableName struct{} `sql:"user"`
-	ID        int      `sql:"id"`
-	Name      string   `sql:"name"`
+	UserID    int      `sql:"user_id"`
+	UserName  string   `sql:"user_name"`
 	Email     string   `sql:"email"`
 	Password  string   `sql:"password"`
 	//CreditCard []string
@@ -15,8 +15,8 @@ type User struct {
 
 func (usr *User) MapToModule() model.User {
 	return model.User{
-		ID:       usr.ID,
-		Name:     usr.Name,
+		UserID:   usr.UserID,
+		UserName: usr.UserName,
 		Email:    usr.Email,
 		Password: usr.Password,
 		//CreditCard: usr.CreditCard,
@@ -25,8 +25,8 @@ func (usr *User) MapToModule() model.User {
 
 func (u *User) Fill(usr *model.User) *User {
 	return &User{
-		ID:       usr.ID,
-		Name:     usr.Name,
+		UserID:   usr.UserID,
+		UserName: usr.UserName,
 		Email:    usr.Email,
 		Password: usr.Password,
 		//CreditCard: usr.CreditCard,

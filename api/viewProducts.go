@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetAllProducts to view all the products stored in the database
 func GetAllProducts(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
@@ -18,6 +19,7 @@ func GetAllProducts(c *gin.Context) {
 	}
 	defer db.Close()
 
+	//Select Query
 	rows, err := db.Query("SELECT id, name, price FROM products")
 	if err != nil {
 		log.Println(err)
@@ -29,7 +31,7 @@ func GetAllProducts(c *gin.Context) {
 	var products []model.Product
 	for rows.Next() {
 		var product model.Product
-		err := rows.Scan(&product.ID, &product.Name, &product.Price)
+		err := rows.Scan(&product.ProductID, &product.ProductName, &product.Price)
 		if err != nil {
 			log.Println(err)
 			continue
