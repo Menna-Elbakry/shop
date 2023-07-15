@@ -3,29 +3,32 @@ package api
 import (
 	"log"
 	"net/http"
-
-	database "shopping/database/implement"
 	model "shopping/model"
-
+auth "shopping/authMiddleware"
 	"github.com/gin-gonic/gin"
 )
 
 func Login(c *gin.Context) {
-	db, err := database.GetDB()
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
-		return
-	}
-	defer db.Close()
-
 	var user model.User
-	err = db.QueryRow(`SELECT *FROM public."user" WHERE email =$1 And password =$2;`, user.Email, user.Password).Scan(&user.UserID, &user.UserName, &user.Email)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": err.Error()})
+	// Verify user credentials
+	authenticated := auth.AuthenticateUser(user.UserName, user.Password)
+	if !authenticated {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	// Generate JWT token
+	token, err := auth.GenerateToken(user.UserName)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }
