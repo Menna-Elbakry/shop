@@ -27,6 +27,7 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	_, err = db.Exec(`INSERT INTO public."user" (user_id, user_name, email, "password")
 	VALUES (?,?,?,?);`, user.UserID, user.UserName, user.Email, user.Password)
 	if err != nil {

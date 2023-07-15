@@ -1,15 +1,17 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	auth "shopping/authMiddleware"
+	database "shopping/database/implement"
 	model "shopping/model"
-auth "shopping/authMiddleware"
-	"github.com/gin-gonic/gin"
 )
 
 func Login(c *gin.Context) {
 	var user model.User
+
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
@@ -24,11 +26,14 @@ func Login(c *gin.Context) {
 
 	// Generate JWT token
 	token, err := auth.GenerateToken(user.UserName)
+
+	err = db.QueryRow(`SELECT *FROM public."user" WHERE email =$1 And password =$2;`, user.Email, user.Password).Scan(&user.UserID, &user.UserName, &user.Email)
+
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 }

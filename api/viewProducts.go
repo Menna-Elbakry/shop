@@ -31,7 +31,6 @@ func GetAllProducts(c *gin.Context) {
 	}
 	var products []model.Product
 
-	// Iterate over the rows
 	for rows.Next() {
 		var product model.Product
 
