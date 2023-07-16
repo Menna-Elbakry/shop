@@ -28,6 +28,21 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
+	// Check if a user with the same email already exists
+	var count int
+	err = db.QueryRow(`SELECT COUNT(*) FROM public."user" WHERE email = $1`, user.Email).Scan(&count)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if count > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User with the same email already exists"})
+		return
+	}
+
+	
 	_, err = db.Exec(`INSERT INTO public."user" (user_id, user_name, email, "password")
 	VALUES ($1,$2,$3,$4);`, user.UserID, user.UserName, user.Email, user.Password)
 	if err != nil {

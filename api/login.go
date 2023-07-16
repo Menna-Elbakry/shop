@@ -40,7 +40,7 @@ func Login(c *gin.Context) {
 
 	// Query the database to retrieve the user based on the provided email
 	var user model.User
-	err = db.QueryRow(`SELECT user_id, email, password FROM public."user" WHERE email = $1;`, request.Email).Scan(&user.UserID, &user.Email, &user.Password)
+	err = db.QueryRow(`SELECT user_id,email,password FROM public."user" WHERE email = $1;`, request.Email).Scan(&user.UserID, &user.Email, &user.Password)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
