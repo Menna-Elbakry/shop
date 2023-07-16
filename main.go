@@ -31,7 +31,7 @@ func main() {
 	public := route.Group("/public")
 	public.GET("/products", a.GetAllProducts)
 	public.POST("/signup", a.SignUp)
-	//public.POST("/login", a.Login)
+	public.POST("/login", a.Login)
 
 	// User APIs
 	user := route.Group("/user")

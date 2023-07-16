@@ -29,8 +29,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
-		}
-
+		} 
+		
 		claims, ok := token.Claims.(*model.Token)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
@@ -39,13 +39,13 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Pass the username in the context for further processing
-		c.Set("username", claims.Username)
+		c.Set("user_id", claims.UserID)
 
 		c.Next()
 	}
 }
 
-func AuthenticateUser(username, password string) bool {
+func AuthenticateUser(email, password string) bool {
 	// Connect to the database
 	db, err := database.GetDB()
 	if err != nil {
@@ -54,9 +54,9 @@ func AuthenticateUser(username, password string) bool {
 	}
 	defer db.Close()
 
-	// Query the database to check if the username and password match
+	// Query the database to retrieve the stored password for the given email
 	var storedPassword string
-	err = db.QueryRow(`SELECT password FROM public."user" WHERE user_name = $?;`, username).Scan(&storedPassword)
+	err = db.QueryRow(`SELECT password FROM public."user" WHERE email = $1;`, email).Scan(&storedPassword)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -70,9 +70,9 @@ func AuthenticateUser(username, password string) bool {
 	return false
 }
 
-func GenerateToken(username string) (string, error) {
+func GenerateToken(useId int) (string, error) {
 	claims := &model.Token{
-		Username: username,
+		UserID: useId ,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 		},

@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Signup to add new user to database
+// SignUp to add new user to database
 func SignUp(c *gin.Context) {
 	db, err := database.GetDB()
 	if err != nil {
@@ -29,21 +29,36 @@ func SignUp(c *gin.Context) {
 	}
 
 	_, err = db.Exec(`INSERT INTO public."user" (user_id, user_name, email, "password")
-	VALUES (?,?,?,?);`, user.UserID, user.UserName, user.Email, user.Password)
+	VALUES ($1,$2,$3,$4);`, user.UserID, user.UserName, user.Email, user.Password)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 	// Generate JWT token
-	token, err := auth.GenerateToken(user.UserName)
+	tokenString, err := GenerateTokenString(user.UserID)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	// Store the token in the database
+	_, err = db.Exec(`INSERT INTO public."token" (user_id, token) VALUES ($1, $2);`, user.UserID, tokenString)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "token": tokenString})
+}
+
+func GenerateTokenString(userID int) (string, error) {
+	tokenString, err := auth.GenerateToken(userID)
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
