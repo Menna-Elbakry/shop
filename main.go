@@ -36,6 +36,7 @@ func main() {
 	// User APIs
 	user := route.Group("/user")
 	user.POST("/buyproduct/:id", a.BuyProduct)
+	user.POST("/credit-card", a.AddCreditCard)
 
 	r := route.Run(":8080")
 	if r != nil {
