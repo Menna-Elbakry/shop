@@ -37,7 +37,7 @@ func GetAllProducts(c *gin.Context) {
 		// Scan the row values into the struct fields
 		err := rows.Scan(&product.ProductID, &product.ProductName, &product.Price)
 		if err != nil {
-
+return 
 		}
 
 		// Append the product to the slice
@@ -45,7 +45,7 @@ func GetAllProducts(c *gin.Context) {
 	}
 
 	if err = rows.Err(); err != nil {
-
+return 
 	}
 
 	// Process the retrieved data

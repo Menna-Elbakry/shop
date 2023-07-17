@@ -6,9 +6,9 @@ import (
 
 type CreditCard struct {
 			CardNumber   string `sql:"card_number"`
-			ExpMonth     string `sql:"exp_month"`
-			ExpYear      string `sql:"exp_year"`
-			CVC          string `sql:"cvc"`
+			ExpMonth     int `sql:"expiration_month"`
+			ExpYear      int `sql:"expiration_month"`
+			CVV          string `sql:"cvv"`
 }
 
 func (card *CreditCard) MapToModule() model.Order {

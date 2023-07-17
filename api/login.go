@@ -3,11 +3,9 @@ package api
 import (
 	"log"
 	"net/http"
-	auth "shopping/authMiddleware"
 	database "shopping/database/implement"
 	model "shopping/model"
-	//"strconv"
-
+"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,6 +21,13 @@ type LoginResponse struct {
 
 // Login authenticates the user and generates a JWT token
 func Login(c *gin.Context) {
+
+	var user model.User
+	var logs []model.User
+	var request LoginRequest
+
+
+//databse Connection
 	db, err := database.GetDB()
 	if err != nil {
 		log.Println(err)
@@ -36,23 +41,38 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
-	var request LoginRequest
+	
 
 	// Query the database to retrieve the user based on the provided email
-	var user model.User
-	err = db.QueryRow(`SELECT user_id,email,password FROM public."user" WHERE email = $1;`, request.Email).Scan(&user.UserID, &user.Email, &user.Password)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+	rows,er := db.Query(`SELECT * FROM public."user" WHERE email = $1;`,request.Email)
+	if er != nil {
+		log.Println(er)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": er.Error()})
 		return
 	}
 
-	// Authenticate the user
-	if !auth.AuthenticateUser(user.Password, request.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User Doesn't Exist"})
-		return
+		// Scan the row values into the struct fields
+	for rows.Next() {
+		err := rows.Scan(&user.UserID,&user.UserName,&user.Email, &user.Password)
+		if err != nil {
+return 
+		}
+		// Append the product to the slice
+		logs= append(logs, user)
 	}
-	// Generate JWT token
+
+	if err = rows.Err(); err != nil {
+return 
+	}
+	//print user row
+	for _, user := range logs {
+		if user.Password == request.Password {
+			fmt.Println("Authorized: %v/n %v/n %v/n",user.UserID, user.UserName, user.Email)
+			return 
+		}
+	}
+   
+	// Generate new token
 	tokenString, err := GenerateTokenString(user.UserID)
 	if err != nil {
 		log.Println(err)
@@ -60,12 +80,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
+
+	//update old token with new one
 	_, err = db.Exec(`UPDATE public."token" SET token = $1 WHERE user_id = $2;`, tokenString, user.UserID)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update token"})
 		return
 	}
+
+
 
 	response := LoginResponse{
 		Email: user.Email,

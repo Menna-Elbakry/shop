@@ -19,7 +19,6 @@ func (usr *User) MapToModule() model.User {
 		UserName: usr.UserName,
 		Email:    usr.Email,
 		Password: usr.Password,
-		//CreditCard: usr.CreditCard,
 	}
 }
 
@@ -29,6 +28,5 @@ func (u *User) Fill(usr *model.User) *User {
 		UserName: usr.UserName,
 		Email:    usr.Email,
 		Password: usr.Password,
-		//CreditCard: usr.CreditCard,
 	}
 }
