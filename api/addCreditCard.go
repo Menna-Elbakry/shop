@@ -1,11 +1,10 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
-	"fmt"
-	
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v72"
@@ -25,7 +24,6 @@ func AddCreditCard(c *gin.Context) {
 	}
 	defer db.Close()
 
-	stripeAPIKey := "sk_test_51NUoOjCnFRK4tebumo0BqzNvC97xvaivLl1gzQdpwtap2dW65S9N6SAPyeQmDItsi1of25xUnHUSA1cJbDkuH8AN00SYCebPwU"
 	stripe.Key = stripeAPIKey
 
 	var creditCard model.CreditCard
